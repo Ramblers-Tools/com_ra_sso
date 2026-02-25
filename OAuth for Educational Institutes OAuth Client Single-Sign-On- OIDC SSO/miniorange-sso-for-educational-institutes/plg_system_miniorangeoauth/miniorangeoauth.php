@@ -25,6 +25,7 @@ jimport('joomla.plugin.plugin');
 jimport('miniorangeoauthplugin.utility.MoOauthClientHandler');
 
 require_once JPATH_ADMINISTRATOR.DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR.'com_miniorange_oauth'.DIRECTORY_SEPARATOR.'helpers'.DIRECTORY_SEPARATOR.'mo_customer_setup.php';
+require_once JPATH_ADMINISTRATOR . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_miniorange_oauth' . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'mo_oauth_utility.php';
 
 class plgSystemMiniorangeoauth extends CMSPlugin
 {
@@ -34,7 +35,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
         $app            = Factory::getApplication();
         $body           = $app->getBody();
         $tab = 0;
-        $tables = Factory::getDbo()->getTableList();
+        $tables = MoOAuthUtility::getDBObject()->getTableList();
         foreach ($tables as $table)
         {
             if (strpos($table, "miniorange_oauth_config") !== false) {
@@ -99,14 +100,10 @@ class plgSystemMiniorangeoauth extends CMSPlugin
         $post = $input->post->getArray();
 
         $cookie = $input->cookie;
-        // $mo_user_info = $cookie->get('mo_user_info', null);
 
         $lang = $app->getLanguage();
 
-        $lang->load(
-            'plg_system_miniorangeoauth', 
-            JPATH_ADMINISTRATOR
-        );
+        $lang->load('plg_system_miniorangeoauth', JPATH_ADMINISTRATOR);
 
         if (isset($post['mojsp_feedback'])) {
            
@@ -116,11 +113,16 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                 $data = 'Skipped';
             }
 
-            $current_user = Factory::getUser();
-            $feedback_email = !empty($post['feedback_email']) ? $post['feedback_email'] : $current_user->email;
+            if (method_exists($app, 'getIdentity')) {
+                $user = $app->getIdentity();     // Joomla 4+
+            } else {
+                $user = Factory::getUser();      // Joomla 3
+            }
+
+            $feedback_email = !empty($post['feedback_email']) ? $post['feedback_email'] : '';
 
             $fields = array(
-            'uninstall_feedback'=>1
+                'uninstall_feedback'=>1
             );
             $conditions = array(
                 'id'=>'1'
@@ -128,11 +130,10 @@ class plgSystemMiniorangeoauth extends CMSPlugin
 
             MoOauthClientHandler::miniOauthUpdateDb('#__miniorange_oauth_customer', $fields, $conditions);
             $customerResult= MoOauthClientHandler::miniOauthFetchDb('#__miniorange_oauth_customer', array('id'=>'1'));
-            $admin_email = (isset($customerResult['email']) && !empty($customerResult['email'])) ? $customerResult['email'] : $feedback_email;
             $admin_phone = $customerResult['admin_phone'];
             $data1 = $radio . ' : ' . $data;
             include_once JPATH_BASE . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_miniorange_oauth' . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'mo_customer_setup.php';
-            MoOauthCustomer::submit_feedback_form($admin_email, $admin_phone, $data1);
+            MoOauthCustomer::submit_feedback_form($feedback_email, $admin_phone, $data1);
             include_once JPATH_SITE . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Installer' . DIRECTORY_SEPARATOR . 'Installer.php';
             
             foreach ($post['result'] as $fbkey) 
@@ -146,7 +147,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                 if ($type) {
                     $cid = 0;
                     $installer = new Installer();
-                     $installer->setDatabase(Factory::getDbo()); 
+                    $installer->setDatabase(MoOAuthUtility::getDBObject()); 
                     $installer->uninstall($type, $fbkey, $cid);
                 }
             }
@@ -163,10 +164,18 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                 setcookie('session_id', '', time() - 300, '/', "", true, true);
                 setcookie('user_id', '', time() - 300, '/', "", true, true);
 
-                $session = Factory::getSession();
+                if (method_exists($app, 'getSession')) {
+                    $session = $app->getSession();   // Joomla 4+
+                } else {
+                    $session = Factory::getSession();// Joomla 3
+                }
             
                 if($user_id) {
-                    $user = User::getInstance($user_id);
+                    if (method_exists($app, 'getIdentity')) {
+                        $user = $app->getIdentity((int) $user_id);  // Joomla 4+
+                    } else {
+                        $user = User::getInstance((int) $user_id);  // Joomla 3
+                    }
                     $session->set('user', $user);
                     $session->set('session_id', $session_id);
                 }
@@ -186,14 +195,14 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             $input = $app->input;
         }
         $post = $input->post->getArray();
-        $db = Factory::getDbo();
+        $db = MoOAuthUtility::getDBObject();
         $query = $db->getQuery(true);
         $query->select('extension_id');
         $query->from('#__extensions');
         $query->where($db->quoteName('name') . " = " . $db->quote('COM_MINIORANGE_OAUTH'));
         $db->setQuery($query);
         $result = $db->loadColumn();
-        $tables = Factory::getDbo()->getTableList();
+        $tables = MoOAuthUtility::getDBObject()->getTableList();
         $tab = 0;
         foreach ($tables as $table) {
             if (strpos($table, "miniorange_oauth_customer")) {
@@ -201,7 +210,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             }
         }
         if ($tab) {
-            $db = Factory::getDbo();
+            $db = MoOAuthUtility::getDBObject();
             $query = $db->getQuery(true);
             $query->select('uninstall_feedback');
             $query->from('#__miniorange_oauth_customer');
@@ -216,21 +225,19 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                     {
                         if ($results == $id) {
                             ?>
-                            <div id="myModal" class="modal" style="display: none;">
-                                <div class="modal-content">
-                                    <img src="<?php echo Uri::root() . 'plugins/system/miniorangeoauth/assets/image/think.jpg'; ?>" style="width:70px;height;70px;" alt="">
-                                    <p style="font-size:20px;line-height:30px;">
-                                    <?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_UNINSTALL_FEEDBACK'); ?>
-                                    </p>
-                                    <br><br>
-                                    <a style="display:inline-block" href="<?php echo Uri::base()?>index.php?option=com_miniorange_oauth&view=accountsetup&tab-panel=support" class="mo_btn mo_btn-primary"><?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_CONTACT_US'); ?></a>
-                                    &nbsp;&nbsp;&nbsp;
-                                    <button  class="mo_btn mo_btn-primary" onclick="skip()" >Skip</button>
-                                </div>
-                            </div>
                             <div class="form-style-6 " id="form-style-6" style="display: block;">
-                                <!-- <span class="mojsp_close">&times;</span> -->
-                                <h1> <?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_TITLE'); ?> </h1>
+                                <h1 class="feedback-title">
+                                    <?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_TITLE'); ?>
+
+                                    <button type="submit"
+                                            name="miniorange_feedback_skip"
+                                            class="close-x"
+                                            form="mojsp_feedback"
+                                            formnovalidate
+                                            title="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_SKIP_BUTTON'); ?>">
+                                        ✕
+                                    </button>
+                                </h1>
                                 <h3> <?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED'); ?> </h3>
                                 <form name="f" method="post" action="" id="mojsp_feedback">
                                     <input type="hidden" name="mojsp_feedback" value="mojsp_feedback"/>
@@ -240,7 +247,6 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                                         $deactivate_reasons = array(
                                             Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_1'),
                                             Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_2'),
-                                            Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_3'),
                                             Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_4'),
                                             Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_5'),
                                             Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_WHAT_HAPPENED_OPTION_7'),
@@ -259,7 +265,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                                         <br>
                                         <textarea id="query_feedback" name="query_feedback" rows="4"
                                                   style="margin-left:2%"
-                                                  cols="50" placeholder="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_QUERY_PLACEHOLDER'); ?>"></textarea><br><br><br>
+                                                  cols="50" minlength="20" placeholder="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_QUERY_PLACEHOLDER'); ?>"></textarea><br><br><br>
                                         <tr>
                                 <td width="20%"><b> <?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_EMAIL'); ?> <span style="color: #ff0000;">*</span>:</b></td>
                                 <td><input type="email" name="feedback_email" required placeholder="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_EMAIL_PLACEHOLDER'); ?>" style="width:55%"/></td>
@@ -274,10 +280,6 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                                                    class="button button-primary button-large" value="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_SUBMIT_BUTTON'); ?>"/>
                                         </div>
                                         <br>
-                                        <div class="mojsp_modal-footer">
-                                            <input type="submit" name="miniorange_feedback_skip"
-                                                   class="button button-primary button-large" value="<?php echo Text::_('PLG_SYSTEM_MINIORANGEOAUTH_FEEDBACK_FORM_SKIP_BUTTON'); ?>" formnovalidate/>
-                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -285,7 +287,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                             <script>
                                 jQuery('input:radio[name="deactivate_plugin"]').click(function () {
                                     var reason = jQuery(this).val();
-                                    jQuery('#query_feedback').removeAttr('required')
+                                    jQuery('#query_feedback').removeAttr('required');
                                     if (reason == 'Facing issues During Registration') {
                                         jQuery('#query_feedback').attr("placeholder", "Can you please describe the issue in detail?");
                                     } else if (reason == "Does not have the features I'm looking for") {
@@ -380,51 +382,25 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                                 .form-style-6 input[type="button"]:hover {
                                     background: #36547D;
                                 }
-                                .mo_btn {
-                                    border: 1px solid #ccc;
-                                    padding: 10px;
-                                    height: auto;
-                                    width: auto;
-                                    border-radius: 10px;
+                                .feedback-title {
+                                    position: relative;
                                 }
-                                .mo_btn-primary {
-                                    background-color: #2E486B;
-                                    color: white;
-                                    text-decoration: none;
-                                }
-                                .modal {
-                                    position: fixed;
-                                    z-index: 1;
-                                    left: 0;
-                                    top: 0!important;
-                                    width: 100%!important;
-                                    height: 100%!important;
-                                    overflow: auto;
-                                    background-color: rgba(31, 48, 71, 0.6)!important;
-                                    text-align: center!important;
-                                }
-                                .modal-content {
-                                    background-color: #fefefe;
-                                    margin: 15% auto;
-                                    padding: 20px;
-                                    border: 1px solid #888;
-                                    width: 30%;
-                                    height: auto;
-                                    border: 3px solid #2E486B;
-                                }
-                                .close {
-                                    color: #888;
-                                    float: right;
-                                    font-size: 28px;
+                                .close-x {
+                                    position: absolute;
+                                    top: 50%;
+                                    right: 15px;
+                                    transform: translateY(-50%);
+                                    background: transparent;
+                                    border: none;
+                                    color: #fff;
+                                    font-size: 22px;
                                     font-weight: bold;
-                                }
-                                .close:hover,
-                                .close:focus {
-                                    color: #1F3047;
-                                    text-decoration: none;
                                     cursor: pointer;
+                                    padding: 0;
                                 }
-
+                                .close-x:hover {
+                                    color: #ffdddd;
+                                }
                             </style>
                                 <?php
                                 exit;

@@ -38,7 +38,14 @@ class plgWebservicesMiniorangeoauthclientInstallerScript
      */
     public function install($parent) 
     {
-        $db  = Factory::getDbo();
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            $db =  $app->getDatabase();
+        }
+        else{
+            $db = Factory::getDbo();
+        }
         $query = $db->getQuery(true);
         $query->update('#__extensions');
         $query->set($db->quoteName('enabled') . ' = 1');

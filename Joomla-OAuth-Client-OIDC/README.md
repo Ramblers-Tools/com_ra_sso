@@ -54,11 +54,22 @@ Securely log into your Joomla site using **miniOrange’s OAuth/OIDC Single Sign
 
 ---
 
-## Quick Installation:
-1. Go to **Extensions → Manage → Install**
-2. Search for **"MiniOrange OAuth Client"** and install
-3. Configure settings under  
-   **Component → MiniOrange OAuth Client → Configure OAuth**
+## Installation
+- Download the latest installable package from: [OIDC / OAuth Client Plugin](https://plugins.miniorange.com/joomla-single-sign-on-sso-oauth-oidc) (Recommended)  
+OR
+- Go to the **Releases** folder of this repository. Download the file: `Login+with+Azure+AD.zip`
+
+---
+
+## Quick Setup
+1. Log in to your Joomla Administrator panel.
+2. Navigate to:  **Extensions → Manage → Install**
+3. Install the plugin using one of the following methods:
+   - Upload the downloaded .zip file  
+    OR 
+   - Search for **miniOrange OAuth** plugin and install it directly.
+4. After successful installation, click **Get Started**.
+5. Follow the [Setup Guide](https://plugins.miniorange.com/joomla-sso-ldap-mfa-solutions?section=oauth-client) to configure the plugin.
 
 ---
 

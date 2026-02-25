@@ -62,7 +62,7 @@ class MoOAuthLogger
     
     private static function saveLogToDatabase($message, $type = 'info', $file = null, $line = null, $function = null)
     {
-        $db    = Factory::getDbo();
+        $db    = self::getDBObject();
         $query = $db->getQuery(true);
 
         $maxLogs = 10000; // currently unused in your code
@@ -130,7 +130,7 @@ class MoOAuthLogger
 
     public static function getAllLogs()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true)->select($db->quoteName(['timestamp', 'log_level', 'message', 'file', 'line_number', 'function_call']))->from($db->quoteName('#__miniorange_oauth_logs'))->order($db->quoteName('timestamp') . ' DESC');
 
         return $db->setQuery($query)->loadObjectList() ?: [];
@@ -138,7 +138,7 @@ class MoOAuthLogger
 
     private static function isLoggingEnabled()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true)
             ->select($db->quoteName('loggers_enable'))
             ->from($db->quoteName('#__miniorange_oauth_config'))
@@ -148,5 +148,15 @@ class MoOAuthLogger
         $result = $db->loadResult();
 
         return (bool)$result;
+    }
+
+    private static function getDBObject()
+    {
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            return $app->getDatabase();
+        }
+        return Factory::getDbo();
     }
 }

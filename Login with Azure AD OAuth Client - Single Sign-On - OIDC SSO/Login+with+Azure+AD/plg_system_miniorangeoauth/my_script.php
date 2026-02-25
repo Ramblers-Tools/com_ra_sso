@@ -39,15 +39,22 @@ class plgSystemMiniorangeoauthInstallerScript
      */
     public function install($parent) 
     {
+        $app = Factory::getApplication();
 
-          $db  = Factory::getDbo();
-          $query = $db->getQuery(true);
-          $query->update('#__extensions');
-          $query->set($db->quoteName('enabled') . ' = 1');
-          $query->where($db->quoteName('element') . ' = ' . $db->quote('miniorangeoauth'));
-          $query->where($db->quoteName('type') . ' = ' . $db->quote('plugin'));
-          $db->setQuery($query);
-          $db->execute();
+        if (method_exists($app, 'getDatabase')) {
+            $db =  $app->getDatabase();
+        }
+        else{
+            $db = Factory::getDbo();
+        }
+        
+        $query = $db->getQuery(true);
+        $query->update('#__extensions');
+        $query->set($db->quoteName('enabled') . ' = 1');
+        $query->where($db->quoteName('element') . ' = ' . $db->quote('miniorangeoauth'));
+        $query->where($db->quoteName('type') . ' = ' . $db->quote('plugin'));
+        $db->setQuery($query);
+        $db->execute();
     }
 
     /**

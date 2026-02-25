@@ -13,7 +13,6 @@ use Joomla\CMS\Factory;
 
 class MoOAuthUtility
 {
-    
     public static function check_empty_or_null( $value )
     {
         if(! isset($value) || empty($value) ) {
@@ -38,7 +37,7 @@ class MoOAuthUtility
     
     public static function getCustomerDetails()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $query->select('*');
         $query->from($db->quoteName('#__miniorange_oauth_customer'));
@@ -51,7 +50,7 @@ class MoOAuthUtility
 
     public static function GetPluginVersion()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $dbQuery = $db->getQuery(true)
             ->select('manifest_cache')
             ->from($db->quoteName('#__extensions'))
@@ -59,6 +58,16 @@ class MoOAuthUtility
         $db->setQuery($dbQuery);
         $manifest = json_decode($db->loadResult());
         return($manifest->version);
+    }
+
+    public static function getDBObject()
+    {
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            return $app->getDatabase();
+        }
+        return Factory::getDbo();
     }
 
     public static function get_operating_system()

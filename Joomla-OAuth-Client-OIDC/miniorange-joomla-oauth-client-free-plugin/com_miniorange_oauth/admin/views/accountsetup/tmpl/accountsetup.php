@@ -25,6 +25,9 @@ $document->addScript(Uri::base() . 'components/com_miniorange_oauth/assets/js/my
 $document->addStyleSheet(Uri::base() . 'components/com_miniorange_oauth/assets/css/miniorange_oauth.css');
 $document->addStyleSheet(Uri::base() . 'components/com_miniorange_oauth/assets/css/miniorange_boot.css');
 $document->addStyleSheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+$document->addScript('https://code.jquery.com/jquery-3.7.1.min.js');
+$document->addStyleSheet('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+$document->addScript('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js');
 
 $versionObj = new Version();
 $cms_version = $versionObj->getShortVersion();
@@ -101,7 +104,13 @@ $tabs = [
 $oauth_active_tab = isset($active_tab['tab-panel']) && !empty($active_tab['tab-panel']) ? $active_tab['tab-panel'] : 'overview';
 global $license_tab_link;
 $license_tab_link="index.php?option=com_miniorange_oauth&view=accountsetup&tab-panel=license";
-$current_user = Factory::getUser();
+$app = Factory::getApplication();
+
+if (method_exists($app, 'getIdentity')) {
+    $current_user = $app->getIdentity();     // Joomla 4+
+} else {
+    $current_user = Factory::getUser();      // Joomla 3
+}
 if(!PluginHelper::isEnabled('system', 'miniorangeoauth')) {
     ?>
     <div id="system-message-container">
@@ -404,7 +413,7 @@ function selectCustomApp()
 
 function getAppDetails()
 {
-    $db = Factory::getDbo();
+    $db = MoOAuthUtility::getDBObject();    
     $query = $db->getQuery(true);
     $query->select('*');
     $query->from($db->quoteName('#__miniorange_oauth_config'));
@@ -1440,7 +1449,8 @@ function attributerole()
                                     </div>
                                     <div class="mo_boot_col-sm-8">
                                         <?php
-                                            $db = Factory::getDbo();
+                                            $db = MoOAuthUtility::getDBObject();
+
                                             $db->setQuery(
                                                 $db->getQuery(true)
                                                     ->select('*')
@@ -1582,7 +1592,7 @@ function attributerole()
 function proxy_setup()
 {
     // Fetch saved proxy configuration from the database
-    $db = Factory::getDbo();
+    $db = MoOAuthUtility::getDBObject();
     $query = $db->getQuery(true)
         ->select('*')
         ->from($db->quoteName('#__miniorange_oauth_config'));
@@ -2236,16 +2246,24 @@ function support()
                         <div class="mo_boot_col-sm-12 mo_boot_mt-2">
                             <div class="mo_boot_row mo_boot_m-2">
                                 <?php
-                                    
-                                    $current_user = Factory::getUser();
+                                    $app = Factory::getApplication();
+
+                                if (method_exists($app, 'getIdentity')) {
+                                    $current_user = $app->getIdentity();     // Joomla 4+
+                                } else {
+                                    $current_user = Factory::getUser();      // Joomla 3
+                                }
                                     $result = MoOAuthUtility::getCustomerDetails();
                                     $admin_email = empty(trim($result['email']))?$current_user->email:$result['email'];
                                     $user_email= new MoOauthCustomer();
-                                    $result=$user_email->getAccountDetails();
+                                    $result = $user_email->getAccountDetails();
                                 if($result['contact_admin_email']!=null) {
                                     $admin_email =$result['contact_admin_email'];
                                 }
                                     $admin_phone = $result['admin_phone'];
+                                    $country_codes = $user_email->getCountryCodes();
+                                    
+                                    $country_codes = json_decode($country_codes, true);
                                     
                                 ?>
                                 <form name="f" class="mo_boot_col-sm-12" method="post" action="<?php echo Route::_('index.php?option=com_miniorange_oauth&view=accountsetup&task=accountsetup.contactUs'); ?>">
@@ -2263,9 +2281,33 @@ function support()
                                             </div>
                                         </div>
                                         <div class="mo_boot_row mo_boot_mt-2">
-                                            <div class="mo_boot_col-sm-3 offset-1"> <strong><?php echo Text::_('COM_MINIORANGE_OAUTH_MOBILE_NO');?> :</strong></div>
-                                            <div class="mo_boot_col-lg-6 mo_boot_col-sm-8">
-                                                <input type="number" class="mo-form-control oauth-table mo_oauth_textbox" name="query_phone" value="<?php echo $admin_phone ?>" placeholder="<?php echo Text::_('COM_MINIORANGE_OAUTH_MOBILE_NO_PLACEHOLDER');?>"/>
+                                            <!-- Label -->
+                                            <div class="mo_boot_col-sm-3 offset-1">
+                                                <strong><?php echo Text::_('COM_MINIORANGE_OAUTH_MOBILE_NO');?> :</strong>
+                                            </div>
+
+                                            <!-- Country dropdown -->
+                                            <div class="mo_boot_col-sm-2 mo_boot_pr-0">
+                                                <select class="mo-form-control mo_oauth_textbox country-select" name="country_code">
+                                                    <option value="">Select Country</option>
+                                                    <?php
+                                                    foreach($country_codes as $code)
+                                                    {
+                                                        echo '<option value="'.$code['country_code'].'">'.$code['country_name'].' ('.$code['country_code'].')</option>';
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+
+                                            <!-- Phone input -->
+                                            <div class="mo_boot_col-sm-4">
+                                                <input
+                                                    type="number"
+                                                    class="mo-form-control oauth-table mo_oauth_textbox"
+                                                    name="query_phone"
+                                                    value="<?php echo $admin_phone ?>"
+                                                    placeholder="<?php echo Text::_('COM_MINIORANGE_OAUTH_MOBILE_NO_PLACEHOLDER');?>"
+                                                />
                                             </div>
                                         </div>
                                         <div class="mo_boot_row mo_boot_mt-2">
@@ -2460,7 +2502,7 @@ function support()
 
 function mo_oauth_licensing_plan()
 {
-    $db = Factory::getDbo();
+    $db = MoOAuthUtility::getDBObject();
     $query = $db->getQuery(true);
     $query->select('*');
     $query->from($db->quoteName('#__miniorange_oauth_customer'));
@@ -2757,8 +2799,6 @@ function mo_oauth_licensing_plan()
             </div>
         </div>
     </div>
-
-        
     <?php
 }
 

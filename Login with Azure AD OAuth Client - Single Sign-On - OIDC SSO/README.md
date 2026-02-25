@@ -64,10 +64,22 @@ Simplify authentication and user access with **Azure AD Single Sign-On (OAuth Op
 
 ---
 
-## Quick Setup:
-1. Go to **Extensions → Manage → Install**.
-2. Search for **"Login with Azure AD"** and install the plugin.
-3. Configure under **Component → MiniOrange OAuth Client → Configure OAuth**.
+## Installation
+- Download the latest installable package from: [OIDC / OAuth Client Plugin](https://plugins.miniorange.com/joomla-single-sign-on-sso-oauth-oidc) (Recommended)  
+OR
+- Go to the **Releases** folder of this repository. Download the file: `miniorange-joomla-oauth-client-free-plugin.zip`
+
+---
+
+## Quick Setup
+1. Log in to your Joomla Administrator panel.
+2. Navigate to:  **Extensions → Manage → Install**
+3. Install the plugin using one of the following methods:
+   - Upload the downloaded .zip file  
+    OR 
+   - Search for **miniOrange OAuth** plugin and install it directly.
+4. After successful installation, click **Get Started**.
+5. Follow the [Setup Guide](https://plugins.miniorange.com/joomla-sso-ldap-mfa-solutions?section=oauth-client) to configure the plugin.
 
 ---
 

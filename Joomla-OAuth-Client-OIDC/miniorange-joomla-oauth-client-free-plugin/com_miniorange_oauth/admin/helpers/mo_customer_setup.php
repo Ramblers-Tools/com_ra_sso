@@ -24,29 +24,25 @@ class MoOauthCustomer
     public $customerKey;
     public $transactionId;
     
-    /*
-    ** Initial values are hardcoded to support the miniOrange framework to generate OTP for email.
-    ** We need the default value for creating the OTP the first time,
-    ** As we don't have the Default keys available before registering the user to our server.
-    ** This default values are only required for sending an One Time Passcode at the user provided email address.
-    */
-    
-    //auth
-    private $defaultCustomerKey = "16555";
-    private $defaultApiKey = "fFd2XcvTGDemZvbw1bcUesNJWEqKbbUq";
-    
-    
     function request_for_demo($email, $plan, $description,$demo_trail=null,$callDate=null,$timeZone=null)
     { 
         $customerKey = "16555";
-        $fromEmail             = $email;
-        $currentUserEmail     = Factory::getUser();
-        $adminEmail         = $currentUserEmail->email;
-        $jVersion             = new Version();
-        $phpVersion         = phpversion();
-        $moSystemOS         = MoOauthUtility::get_operating_system();
-        $jCmsVersion         = $jVersion->getShortVersion();
-        $moPluginVersion     = MoOauthUtility::GetPluginVersion();
+        $fromEmail = $email;
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getIdentity')) {
+            $user = $app->getIdentity();     // Joomla 4+
+        } else {
+            $user = Factory::getUser();      // Joomla 3
+        }
+        
+        $adminEmail = $user->email;
+        $jVersion = new Version();
+        $phpVersion = phpversion();
+        $moSystemOS = MoOauthUtility::get_operating_system();
+        $jCmsVersion = $jVersion->getShortVersion();
+        $moPluginVersion = MoOauthUtility::GetPluginVersion();
+        $timezone = self::getUserTimezone();
 
         $content='<div>Hello, <br><br><strong>Company</strong> :<a href="'.$_SERVER['SERVER_NAME'].'" target="_blank" >'.$_SERVER['SERVER_NAME'].'</a><br><br><strong>Admin Email : </strong><a href="mailto:'.$adminEmail.'" target="_blank">'.$adminEmail.'</a><br><br><b>Email :</b><a href="mailto:'.$fromEmail.'" target="_blank">'.$fromEmail.'</a><br><br><b>Plugin Name: </b>'.$plan. '<br><br><b>Description: </b>' .$description;
 
@@ -60,7 +56,7 @@ class MoOauthCustomer
             $content='<div>Hello, <br><br><strong>Company</strong> :<a href="'.$_SERVER['SERVER_NAME'].'" target="_blank" >'.$_SERVER['SERVER_NAME'].'</a><br><br><strong>Admin Email : </strong><a href="mailto:'.$adminEmail.'" target="_blank">'.$adminEmail.'</a><br><br><b>Email :</b><a href="mailto:'.$fromEmail.'" target="_blank">'.$fromEmail.'</a><br><br><b>Time Zone:</b> '.$timeZone. '<br><br><b>Date to set up call: </b>' .$callDate. '<br><br><b>Issue :</b> ' .$plan. '<br><br><b>Description: </b>'.$description;
         }
 
-        $content .= '<br><br><b>System Information: </b>Joomla:'. $jCmsVersion .' | PHP: '. $phpVersion .' | Plugin: '. $moPluginVersion .' | OS: '.$moSystemOS.'<br></div>';
+        $content .= '<br><br><b>System Information: </b>Joomla:'. $jCmsVersion .' | PHP: '. $phpVersion .' | Plugin: '. $moPluginVersion .' | OS: '.$moSystemOS.' | Time Zone: '.$timezone.'<br></div>';
 
         
         $fields = array(
@@ -83,15 +79,23 @@ class MoOauthCustomer
     public static function submit_feedback_form($email,$phone,$query)
     {
         $customerKey = "16555";
-        $fromEmail             = $email;
-        $currentUserEmail     = Factory::getUser();
-        $adminEmail         = $currentUserEmail->email;
-        $jVersion             = new Version();
+        $fromEmail   = $email;
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getIdentity')) {
+            $user = $app->getIdentity();     // Joomla 4+
+        } else {
+            $user = Factory::getUser();      // Joomla 3
+        }
+
+        $adminEmail         = $user->email;
+        $jVersion           = new Version();
         $phpVersion         = phpversion();
-        $jCmsVersion         = $jVersion->getShortVersion();
+        $jCmsVersion        = $jVersion->getShortVersion();
         $osName = php_uname('s');      
         $osRelease = php_uname('r');
         $osArch = php_uname('m'); 
+        $timezone = self::getUserTimezone();
         if(class_exists("MoOAuthUtility")) {
             $moPluginVersion     = MoOauthUtility::GetPluginVersion();
         } else {
@@ -106,10 +110,10 @@ class MoOauthCustomer
                     <strong>Phone Number</strong> :'.$phone.'<br><br>
                     <strong>Email :<a href="mailto:'.$fromEmail.'" target="_blank">'.$fromEmail.'</a></strong><br><br>
                     <strong>Admin Email : </strong><a href="mailto:'.$adminEmail.'" target="_blank">'.$adminEmail.'</a><br><br>
-                    <b>Plugin Deactivated: '.$query1. '</b><br><br>
-                    <b>Reason: ' .$query. '</b><br><br>
-                    <b>System Information: Joomla: '.$jCmsVersion.' | PHP: '.$phpVersion.' | Plugin: '.$moPluginVersion.' | OS: '.$osName.' '.$osRelease.' '.$osArch.'</b><br>
-                    <b>Server Name:'. $server_name .'</b></div>';
+                    <b>Plugin Deactivated: </b>'.$query1. '<br><br>
+                    <b>Reason: </b> ' .$query. '<br><br>
+                    <b>System Information: Joomla: </b>'.$jCmsVersion.' | PHP: '.$phpVersion.' | Plugin: '.$moPluginVersion.' | OS: '.$osName.' '.$osRelease.' '.$osArch.' | Time Zone: '.$timezone.'<br>
+                    <b>Server Name: </b>'. $server_name .'</div>';
 
         $fields = array(
             'customerKey'   => $customerKey,
@@ -130,7 +134,8 @@ class MoOauthCustomer
 
     public static function getAccountDetails()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
+
         $query = $db->getQuery(true);
         $query->select('*');
         $query->from($db->quoteName('#__miniorange_oauth_customer'));
@@ -140,10 +145,21 @@ class MoOauthCustomer
         $result=$db->loadAssoc();
         return $result;
     }
+
+    private static function getDBObject()
+    {
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            return $app->getDatabase();
+        }
+        return Factory::getDbo();
+    }
     
     public static function getConfigurationDetails()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
+
         $query = $db->getQuery(true);
         $query->select('*');
         $query->from($db->quoteName('#__miniorange_oauth_config'));
@@ -162,8 +178,14 @@ class MoOauthCustomer
 
         $customerKey          = "16555";
         $fromEmail            = $email;
-        $currentUserEmail     = Factory::getUser();
-        $adminEmail           = $currentUserEmail->email;
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getIdentity')) {
+            $user = $app->getIdentity();     // Joomla 4+
+        } else {
+            $user = Factory::getUser();      // Joomla 3
+        }
+        $adminEmail           = $user->email;
         $subject              = "miniOrange Joomla OAuth Client [Free] for Efficiency";
         $sso_test = base64_decode($customer_details['sso_test']);
         $sso_var = base64_decode($customer_details['sso_var']);
@@ -174,7 +196,8 @@ class MoOauthCustomer
         $accesstokenurl  = ($accesstokenurl == 'NULL') && isset($config_details['access_token_endpoint']) ? $config_details['access_token_endpoint'] : $accesstokenurl;
         $resourceownerdetailsurl  = ($resourceownerdetailsurl == 'NULL') && isset($config_details['user_info_endpoint']) ? $config_details['user_info_endpoint'] : $resourceownerdetailsurl;
         $server_name = self::getServerType();
-
+        $timezone = self::getUserTimezone();
+        
         $query1 ="miniOrange Joomla [Free] OAuth Client to improve efficiency ";
         $content='<div >Hello, <br><br>
             Company :<a href="'.$_SERVER['SERVER_NAME'].'" target="_blank" >'.$_SERVER['SERVER_NAME'].'</a><br><br>
@@ -182,9 +205,11 @@ class MoOauthCustomer
             <strong>Admin Email : </strong><a href="mailto:'.$adminEmail.'" target="_blank">'.$adminEmail.'</a><br><br>
             <b>Email :<a href="mailto:'.$fromEmail.'" target="_blank">'.$fromEmail.'</a></b><br><br>
             <b>Plugin Efficency Check: '.$query1. '</b><br><br>
-            <b>Website: ' .$base_url. '</b><br>
+            <b>Website: ' .$base_url. '</b><br><br>
+            <b>Time Zone: '.$timezone.'</b><br><br>
+            <b>Server Name:'.$server_name.'</b><br><br>
             Creation Date:'.$c_time.'<br> 
-            Daily SSO:'.$dno_ssos.'<br> 
+            Daily SSO:'.$dno_ssos.'<br>
             Total SSO:'.$tno_ssos.'<br>
             Login Count:'. $sso_test .'<br>
             Login Limit:'. $sso_var .'<br>
@@ -196,8 +221,7 @@ class MoOauthCustomer
             Userinfo Endpoint: '.$resourceownerdetailsurl.' <br> 
             Header/Body: '.$in_header_or_body.'<br> 
             Test Configuration: '. $test_configuration .' <br> 
-            Message:'.$reason.'<br>
-            Server Type:' . $server_name .'</div>';
+            Message:'.$reason.'</div>';
 
         $fields = array(
             'customerKey'    => $customerKey,
@@ -220,16 +244,23 @@ class MoOauthCustomer
     public static function send_installation_email()
     {
         $customerKey          = "16555";
-        $currentUserEmail     = Factory::getUser();
-        $adminEmail           = $currentUserEmail->email;
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getIdentity')) {
+            $user = $app->getIdentity();     // Joomla 4+
+        } else {
+            $user = Factory::getUser();      // Joomla 3
+        }
+        $adminEmail           = $user->email;
         $jVersion             = new Version();
         $phpVersion         = phpversion();
         $jCmsVersion         = $jVersion->getShortVersion();
         $osName = php_uname('s');      
         $osRelease = php_uname('r');
         $osArch = php_uname('m'); 
+        $timezone = self::getUserTimezone();
         if(class_exists("MoOAuthUtility")) {
-            $moPluginVersion     = MoOauthUtility::GetPluginVersion();
+            $moPluginVersion = MoOauthUtility::GetPluginVersion();
         } else {
             $moPluginVersion = "NA";
         }
@@ -240,9 +271,8 @@ class MoOauthCustomer
         $content='<div >Hello, <br><br>
             Company :<a href="'.$_SERVER['SERVER_NAME'].'" target="_blank" >'.$_SERVER['SERVER_NAME'].'</a><br><br>
             <strong>Admin Email : </strong><a href="mailto:'. $adminEmail .'" target="_blank">'. $adminEmail .'</a><br><br>
-            <b>System Information: </b>Joomla:'. $jCmsVersion .' | PHP: '. $phpVersion .' | Plugin: '. $moPluginVersion .' | OS: '.$osName.' '.$osRelease.' '.$osArch.'<br>
+            <b>System Information: </b>Joomla:'. $jCmsVersion .' | PHP: '. $phpVersion .' | Plugin: '. $moPluginVersion .' | OS: '.$osName.' '.$osRelease.' '.$osArch.' | Time Zone: '.$timezone.'<br>
             <b>Server Name: </b>'. $server_name .'</div>';
-
 
         $fields = array(
             'customerKey'   => $customerKey,
@@ -252,7 +282,7 @@ class MoOauthCustomer
                 'fromEmail'     => $adminEmail,                
                 'fromName'      => 'miniOrange',
                 'toEmail'       => 'nutan.barad@xecurify.com',
-                'bccEmail'       => 'nikhil.bhot@xecurify.com',
+                'bccEmail'      => 'nikhil.bhot@xecurify.com',
                 'toName'        => 'nutan.barad@xecurify.com',
                 'subject'       => $subject,
                 'content'       => $content
@@ -270,24 +300,31 @@ class MoOauthCustomer
 
         $customerKey = "16555";
         $fromEmail    = $q_email;
-        $currentUserEmail     = Factory::getUser();
-        $adminEmail         = $currentUserEmail->email;
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getIdentity')) {
+            $user = $app->getIdentity();     // Joomla 4+
+        } else {
+            $user = Factory::getUser();      // Joomla 3
+        }
+        $adminEmail         = $user->email;
         $jVersion             = new Version();
         $phpVersion         = phpversion();
         $moSystemOS         = MoOauthUtility::get_operating_system();
         $jCmsVersion         = $jVersion->getShortVersion();
         $moPluginVersion     = MoOauthUtility::GetPluginVersion();
         $server_name = self::getServerType();
-        $query = '[miniOrange Joomla Oauth Client Free | '.$phpVersion. ' | '.$jCmsVersion.' | '.$moPluginVersion.' | ' . $moSystemOS.'] ' . $query;
+        $timezone = self::getUserTimezone();
+        $query = '[miniOrange Joomla Oauth Client Free | '.$phpVersion. ' | '.$jCmsVersion.' | '.$moPluginVersion.' | ' . $moSystemOS. ' | '.$timezone.'] <br> ' . $query;
         $query = $query.'<br><strong>Configuration: </strong><br> <strong>App Name:</strong>  '.$attributes['appname'].'<br> <strong>Custom App: </strong> '. $attributes['custom_app'].' <br> <strong>App Scope: </strong>'.$attributes['app_scope'].'<br> <strong>Authorize Endpoint: </strong>'.$attributes['authorize_endpoint'];
         $subject = "Query for miniOrange Joomla Oauth Client Free  - ".$fromEmail;
-        $content='<div >Hello, <br><br>
+        $content='<div>Hello, <br><br>
             <strong>Company: </strong> <a href="'.$_SERVER['SERVER_NAME'].'" target="_blank" >'.$_SERVER['SERVER_NAME'].'</a><br><br>
             <strong>Phone Number: </strong>'.$q_phone.'<br><br>
             <strong>Admin Email: </strong><a href="mailto:'.$adminEmail.'" target="_blank">'.$adminEmail.'</a><br><br>
             <b>Email: <a href="mailto:'.$fromEmail.'" target="_blank">'.$fromEmail.'</a></b><br>
             <b>Server Name: </b>'  . $server_name. '<br>
-            <b>Query: </b>'.$query. '</b></div>';
+            <b>Query: </b>'.$query. '</div>';
     
         $fields = array(
             'customerKey'    => $customerKey,
@@ -352,8 +389,8 @@ class MoOauthCustomer
         }
         $content = curl_exec($ch);
         if (curl_errno($ch)) {
-            echo 'Request Error:' . curl_error($ch);
-            exit();
+            curl_close($ch);
+            return json_encode(array("status"=>'Error','message'=>'Request Error: ' . curl_error($ch)));
         }
         curl_close($ch);
 
@@ -362,27 +399,54 @@ class MoOauthCustomer
 
     public static function getServerType()
     {
-        $server = $_SERVER['SERVER_SOFTWARE'] ?? '';
-
-        if (stripos($server, 'Apache') !== false) {
-            return 'Apache';
-        }
-
-        if (stripos($server, 'nginx') !== false) {
-            return 'Nginx';
-        }
-
-        if (stripos($server, 'LiteSpeed') !== false) {
-            return 'LiteSpeed';
-        }
-
-        if (stripos($server, 'IIS') !== false) {
-            return 'IIS';
-        }
-
-        return 'Unknown';
+        return $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown';
     }
 
+    public static function getUserTimezone()
+    {
+        $app = Factory::getApplication();
+        try {
+            // 1. Browser timezone (BEST & VPN-proof)
+            if (!empty($_COOKIE['user_tz'])) {
+                $tz = new DateTimeZone($_COOKIE['user_tz']);
+                $dt = new DateTime('now', $tz);
+                return 'UTC' . $dt->format('P') . ' (' . $_COOKIE['user_tz'] . ')';
+            }
+
+            if (method_exists($app, 'getIdentity')) {
+                $user = $app->getIdentity();     // Joomla 4+
+            } else {
+                $user = Factory::getUser();      // Joomla 3
+            }
+            if ($user && $user->id) {
+                $userTz = $user->getParam('timezone');
+                if (!empty($userTz)) {
+                    $tz = new \DateTimeZone($userTz);
+                    $dt = new \DateTime('now', $tz);
+                    return 'UTC' . $dt->format('P');
+                }
+            }
+
+            // 3. Joomla global timezone
+            if (method_exists($app, 'getConfig')) {
+                $siteTz = $app->getConfig()->get('offset');     // Joomla 4+
+            } else {
+                $siteTz = Factory::getConfig()->get('offset');     // Joomla 3
+            }
+            
+            if (!empty($siteTz)) {
+                $tz = new \DateTimeZone($siteTz);
+                $dt = new \DateTime('now', $tz);
+                return 'UTC' . $dt->format('P');
+            }
+
+        } catch (\Exception $e) {
+            return 'UTC+00:00';
+        }
+
+        // 4. Final fallback
+        return 'UTC+00:00';
+    }
 
     function getAppJason()
     {
@@ -693,8 +757,103 @@ class MoOauthCustomer
 			"IMIS": {
 				"0":"both","1":"Domain"
 			}
-	
-			
 		}';
+    }
+
+    function getCountryCodes()
+    {
+        return '[
+            { "country_name": "Afghanistan", "country_id": "AF", "country_code": "+93" },
+            { "country_name": "Albania", "country_id": "AL", "country_code": "+355" },
+            { "country_name": "Algeria", "country_id": "DZ", "country_code": "+213" },
+            { "country_name": "Andorra", "country_id": "AD", "country_code": "+376" },
+            { "country_name": "Angola", "country_id": "AO", "country_code": "+244" },
+            { "country_name": "Argentina", "country_id": "AR", "country_code": "+54" },
+            { "country_name": "Armenia", "country_id": "AM", "country_code": "+374" },
+            { "country_name": "Australia", "country_id": "AU", "country_code": "+61" },
+            { "country_name": "Austria", "country_id": "AT", "country_code": "+43" },
+            { "country_name": "Azerbaijan", "country_id": "AZ", "country_code": "+994" },       
+            { "country_name": "Bahamas", "country_id": "BS", "country_code": "+1" },
+            { "country_name": "Bahrain", "country_id": "BH", "country_code": "+973" },
+            { "country_name": "Bangladesh", "country_id": "BD", "country_code": "+880" },
+            { "country_name": "Belarus", "country_id": "BY", "country_code": "+375" },
+            { "country_name": "Belgium", "country_id": "BE", "country_code": "+32" },
+            { "country_name": "Belize", "country_id": "BZ", "country_code": "+501" },
+            { "country_name": "Benin", "country_id": "BJ", "country_code": "+229" },
+            { "country_name": "Bhutan", "country_id": "BT", "country_code": "+975" },
+            { "country_name": "Bolivia", "country_id": "BO", "country_code": "+591" },
+            { "country_name": "Bosnia and Herzegovina", "country_id": "BA", "country_code": "+387" },
+            { "country_name": "Botswana", "country_id": "BW", "country_code": "+267" },
+            { "country_name": "Brazil", "country_id": "BR", "country_code": "+55" },
+            { "country_name": "Brunei", "country_id": "BN", "country_code": "+673" },
+            { "country_name": "Bulgaria", "country_id": "BG", "country_code": "+359" },     
+            { "country_name": "Cambodia", "country_id": "KH", "country_code": "+855" },
+            { "country_name": "Cameroon", "country_id": "CM", "country_code": "+237" },
+            { "country_name": "Canada", "country_id": "CA", "country_code": "+1" },
+            { "country_name": "Chile", "country_id": "CL", "country_code": "+56" },
+            { "country_name": "China", "country_id": "CN", "country_code": "+86" },
+            { "country_name": "Colombia", "country_id": "CO", "country_code": "+57" },
+            { "country_name": "Costa Rica", "country_id": "CR", "country_code": "+506" },
+            { "country_name": "Croatia", "country_id": "HR", "country_code": "+385" },
+            { "country_name": "Cuba", "country_id": "CU", "country_code": "+53" },
+            { "country_name": "Cyprus", "country_id": "CY", "country_code": "+357" },
+            { "country_name": "Czech Republic", "country_id": "CZ", "country_code": "+420" },       
+            { "country_name": "Denmark", "country_id": "DK", "country_code": "+45" },
+            { "country_name": "Dominican Republic", "country_id": "DO", "country_code": "+1" },     
+            { "country_name": "Ecuador", "country_id": "EC", "country_code": "+593" },
+            { "country_name": "Egypt", "country_id": "EG", "country_code": "+20" },
+            { "country_name": "El Salvador", "country_id": "SV", "country_code": "+503" },
+            { "country_name": "Estonia", "country_id": "EE", "country_code": "+372" },
+            { "country_name": "Ethiopia", "country_id": "ET", "country_code": "+251" },     
+            { "country_name": "Finland", "country_id": "FI", "country_code": "+358" },
+            { "country_name": "France", "country_id": "FR", "country_code": "+33" },        
+            { "country_name": "Georgia", "country_id": "GE", "country_code": "+995" },
+            { "country_name": "Germany", "country_id": "DE", "country_code": "+49" },
+            { "country_name": "Ghana", "country_id": "GH", "country_code": "+233" },
+            { "country_name": "Greece", "country_id": "GR", "country_code": "+30" },        
+            { "country_name": "Hungary", "country_id": "HU", "country_code": "+36" },       
+            { "country_name": "Iceland", "country_id": "IS", "country_code": "+354" },
+            { "country_name": "India", "country_id": "IN", "country_code": "+91" },
+            { "country_name": "Indonesia", "country_id": "ID", "country_code": "+62" },
+            { "country_name": "Iran", "country_id": "IR", "country_code": "+98" },
+            { "country_name": "Iraq", "country_id": "IQ", "country_code": "+964" },
+            { "country_name": "Ireland", "country_id": "IE", "country_code": "+353" },
+            { "country_name": "Israel", "country_id": "IL", "country_code": "+972" },
+            { "country_name": "Italy", "country_id": "IT", "country_code": "+39" },     
+            { "country_name": "Japan", "country_id": "JP", "country_code": "+81" },     
+            { "country_name": "Kenya", "country_id": "KE", "country_code": "+254" },
+            { "country_name": "Kuwait", "country_id": "KW", "country_code": "+965" },       
+            { "country_name": "Malaysia", "country_id": "MY", "country_code": "+60" },
+            { "country_name": "Mexico", "country_id": "MX", "country_code": "+52" },
+            { "country_name": "Nepal", "country_id": "NP", "country_code": "+977" },
+            { "country_name": "Netherlands", "country_id": "NL", "country_code": "+31" },
+            { "country_name": "New Zealand", "country_id": "NZ", "country_code": "+64" },
+            { "country_name": "Nigeria", "country_id": "NG", "country_code": "+234" },
+            { "country_name": "Norway", "country_id": "NO", "country_code": "+47" },        
+            { "country_name": "Pakistan", "country_id": "PK", "country_code": "+92" },
+            { "country_name": "Philippines", "country_id": "PH", "country_code": "+63" },
+            { "country_name": "Poland", "country_id": "PL", "country_code": "+48" },
+            { "country_name": "Portugal", "country_id": "PT", "country_code": "+351" },     
+            { "country_name": "Qatar", "country_id": "QA", "country_code": "+974" },        
+            { "country_name": "Romania", "country_id": "RO", "country_code": "+40" },
+            { "country_name": "Russia", "country_id": "RU", "country_code": "+7" },     
+            { "country_name": "Saudi Arabia", "country_id": "SA", "country_code": "+966" },
+            { "country_name": "Singapore", "country_id": "SG", "country_code": "+65" },
+            { "country_name": "South Africa", "country_id": "ZA", "country_code": "+27" },
+            { "country_name": "South Korea", "country_id": "KR", "country_code": "+82" },
+            { "country_name": "Spain", "country_id": "ES", "country_code": "+34" },
+            { "country_name": "Sri Lanka", "country_id": "LK", "country_code": "+94" },
+            { "country_name": "Sweden", "country_id": "SE", "country_code": "+46" },
+            { "country_name": "Switzerland", "country_id": "CH", "country_code": "+41" },       
+            { "country_name": "Thailand", "country_id": "TH", "country_code": "+66" },
+            { "country_name": "Turkey", "country_id": "TR", "country_code": "+90" },        
+            { "country_name": "Ukraine", "country_id": "UA", "country_code": "+380" },
+            { "country_name": "United Arab Emirates", "country_id": "AE", "country_code": "+971" },
+            { "country_name": "United Kingdom", "country_id": "GB", "country_code": "+44" },
+            { "country_name": "United States", "country_id": "US", "country_code": "+1" },      
+            { "country_name": "Vietnam", "country_id": "VN", "country_code": "+84" },
+            { "country_name": "Zimbabwe", "country_id": "ZW", "country_code": "+263" }
+        ]';
+
     }
 }?>

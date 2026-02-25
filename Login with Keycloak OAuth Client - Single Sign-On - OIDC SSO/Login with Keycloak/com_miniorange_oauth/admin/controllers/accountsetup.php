@@ -31,7 +31,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
             $input = $app->input;
         }
         $post=    $input->post->getArray();
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $fields = array(
             $db->quoteName('contact_admin_email') . ' = '.$db->quote($post['oauth_client_admin_email']),
@@ -71,7 +71,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
                 $redirectUri               = isset($post['callbackurl'])? $post['callbackurl'] : '';
                 $redirectUri               = $callbackurlhttp."".$redirectUri ;
                 $appname                   = isset($post['mo_oauth_app_name'])? $post['mo_oauth_app_name'] : '';
-                $db     = Factory::getDbo();
+                $db     = self::getDBObject();
                 $query  = $db->getQuery(true);
                 $fields = array(
                     $db->quoteName('appname') . ' = '.$db->quote($appname),
@@ -155,7 +155,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
                 $in_header_or_body ="inBody";
             }
     
-            $db     = Factory::getDbo();
+            $db     = self::getDBObject();
             $query  = $db->getQuery(true);
             $fields = array(
                 $db->quoteName('appname') . ' = '.$db->quote($appname),
@@ -186,7 +186,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
 
             $time = time();
             $c_time = date('m/d/Y H:i:s', time());
-            $db = Factory::getDbo();
+            $db = self::getDBObject();
             $query = $db->getQuery(true);
             $fields = array(
                 $db->quoteName('cd_plugin') . ' = '.$db->quote($time),
@@ -231,7 +231,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
         $email_attr = isset($post['mo_oauth_email_attr'])? $post['mo_oauth_email_attr'] : '';
         $first_name_attr = isset($post['mo_oauth_first_name_attr'])? $post['mo_oauth_first_name_attr'] : '';
 
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $fields = array(
             $db->quoteName('email_attr') . ' = '.$db->quote($email_attr),
@@ -273,7 +273,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
         $first_name_attr="";
         $test_attribute_name = "";
 
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $fields = array(
             $db->quoteName('appname') . ' = '.$db->quote($appname),
@@ -384,20 +384,21 @@ class miniorangeoauthControllerAccountSetup extends FormController
             $this->setRedirect('index.php?option=com_miniorange_oauth&view=accountsetup&tab-panel=support');
             return;
         }
+
         $query_email = isset($post['query_email']) ?$post['query_email'] :'';
         $query       = isset($post['query']) ? $post['query']: '';
+        $phone_code  = isset($post['country_code'])? $post['country_code']: '';
         $phone       = isset($post['query_phone'])? $post['query_phone']: '';
         $query_withconfig = isset($post['mo_oauth_query_withconfig'])? $post['mo_oauth_query_withconfig'] : ''; 
         $appDetails = $this->retrieveAttributes('#__miniorange_oauth_config');
+        $phone = $phone_code . ' ' . $phone;
 
         if ($query_withconfig != 1) {
-
             $appDetails['appname'] = '';
             $appDetails['custom_app'] = '';
             $appDetails['app_scope'] = '';
             $appDetails['authorize_endpoint'] = '';
         }
-
 
         if(MoOAuthUtility::check_empty_or_null($query_email) || MoOAuthUtility::check_empty_or_null($query) ) {
             $this->setRedirect('index.php?option=com_miniorange_oauth&view=accountsetup&tab-panel=support', Text::_('COM_MINIORANGE_OAUTH_SUBMIT_QUERY_WITH_EMAIL'), 'error');
@@ -421,7 +422,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
    
     function updateDatabaseQuery($database_name, $updatefieldsarray)
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         foreach ($updatefieldsarray as $key => $value)
         {
@@ -468,7 +469,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
 
     function retrieveAttributes($tablename)
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $query->select('*');
         $query->from($db->quoteName($tablename));
@@ -577,7 +578,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
 
     public function moClearLogs()
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
 
         $query = "SELECT COUNT(*) FROM " . $db->quoteName('#__miniorange_oauth_logs');
         $db->setQuery($query);
@@ -653,5 +654,15 @@ class miniorangeoauthControllerAccountSetup extends FormController
 
         fclose($output);
         exit; 
+    }
+
+    private static function getDBObject()
+    {
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            return $app->getDatabase();
+        }
+        return Factory::getDbo();
     }
 }

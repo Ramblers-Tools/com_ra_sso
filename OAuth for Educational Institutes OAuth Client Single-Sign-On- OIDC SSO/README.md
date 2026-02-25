@@ -1,6 +1,6 @@
 # Joomla SSO (Single Sign-On) for Educational Institutes Plugin
 
-Enhance accessibility and streamline authentication with the **Joomla SSO for Educational Institutes** plugin. This powerful solution supports seamless integration with a wide range of **Learning Management Systems (LMS)** such as **ClassLink**, **Clever**, **Canvas**, **Google Classroom**, and more—allowing students and faculty to access all portals using a single set of credentials.
+Enhance accessibility and streamline authentication with the **Joomla SSO for Educational Institutes** plugin. This powerful solution supports seamless integration with a wide range of **Learning Management Systems (LMS)** such as **ClassLink**, **Clever**, **Canvas**, **Google Classroom**, and more, allowing students and faculty to access all portals using a single set of credentials.
 
 ## Key Highlights:
 - **Simplified Login Process**:  
@@ -39,10 +39,20 @@ Enhance accessibility and streamline authentication with the **Joomla SSO for Ed
 - **SSO Login Audit**: Track user activity and generate detailed reports.
 - **REST API Authentication**: Secure Joomla pages and sites using REST API authentication.
 
-## Quick Setup:
-1. Go to **Extensions → Manage → Install**.
-2. Search for **"Joomla SSO for Educational Institutes"** and install the plugin.
-3. Configure authentication using your **OAuth/OIDC** credentials.
+## Installation
+- Download the latest installable package from: [OIDC / OAuth Client Plugin](https://plugins.miniorange.com/joomla-single-sign-on-sso-oauth-oidc) (Recommended)  
+OR
+- Go to the **Releases** folder of this repository. Download the file: `miniorange-sso-for-educational-institutes.zip`
+
+## Quick Setup
+1. Log in to your Joomla Administrator panel.
+2. Navigate to:  **Extensions → Manage → Install**
+3. Install the plugin using one of the following methods:
+   - Upload the downloaded .zip file  
+    OR 
+   - Search for **miniOrange OAuth** plugin and install it directly.
+4. After successful installation, click **Get Started**.
+5. Follow the [Setup Guide](https://plugins.miniorange.com/joomla-sso-ldap-mfa-solutions?section=oauth-client) to configure the plugin.
 
 ## Dependencies:
 - **NONE**

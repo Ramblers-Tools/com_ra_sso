@@ -26,7 +26,7 @@ class MoOauthClientHandler
 
     public static function miniOauthFetchDb($tableName,$condition,$method='loadAssoc',$columns='*')
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $columns = is_array($columns)?$db->quoteName($columns):$columns;
         $query->select($columns);
@@ -51,7 +51,7 @@ class MoOauthClientHandler
 
     public static function miniOauthUpdateDb($tableName, $data, $condition)
     {
-        $db = Factory::getDbo();
+        $db = self::getDBObject();
         $query = $db->getQuery(true);
         $query->update($db->quoteName($tableName));
         foreach ($data as $key => $value) {
@@ -496,7 +496,7 @@ class MoOauthClientHandler
     function get_user_from_joomla($email)
     {
         //Check if email exist in database
-        $db = Factory::getDBO();
+        $db = self::getDBObject();
         $query = $db->getQuery(true)
             ->select('id')
             ->from('#__users')
@@ -604,6 +604,16 @@ class MoOauthClientHandler
         $result = self::miniOauthUpdateDb('#__session', $data, $condition);
 
         return $result;
+    }
+
+    private static function getDBObject()
+    {
+        $app = Factory::getApplication();
+
+        if (method_exists($app, 'getDatabase')) {
+            return $app->getDatabase();
+        }
+        return Factory::getDbo();
     }
 
 }

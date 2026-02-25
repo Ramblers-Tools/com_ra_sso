@@ -153,7 +153,6 @@ window.addEventListener('DOMContentLoaded', function () {
 
 });
 
-/*removed internal js*/
 function closeModel() {
     jQuery(".TC_modal").css("display", "none");
 }
@@ -238,3 +237,30 @@ function toggleCollapse(contentId, iconElement) {
         iconElement.textContent = "+";
     }
 }
+
+jQuery(document).ready(function ($) {
+    $('.country-select').select2({
+        matcher: function (params, data) {
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            if (data.text.toLowerCase().includes(params.term.toLowerCase())) {
+                return data;
+            }
+            return null;
+        },
+        width: '100%'
+    });
+});
+
+(function () {
+    try {
+        var tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var offset = new Date().getTimezoneOffset();
+
+        document.cookie = "user_tz=" + tzName + "; path=/";
+        document.cookie = "user_tz_offset=" + offset + "; path=/";
+    } catch (e) {
+        console.error("Error determining timezone:", e);
+    }
+})();
