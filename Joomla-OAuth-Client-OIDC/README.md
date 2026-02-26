@@ -86,3 +86,6 @@ Simplify Single Sign-On for your Joomla site today!
 
 ## Website:
 Explore more Joomla plugins at:  **https://plugins.miniorange.com**
+
+![GitHub Downloads](https://img.shields.io/github/downloads/miniOrange-joomla/Joomla-OAuth-Client-OIDC/total?cacheSeconds=60)
+![Repo Views](https://komarev.com/ghpvc/?username=miniOrange-joomla&repo=Joomla-OAuth-Client-OIDC&label=Repo%20Views&color=0e75b6&style=flat)
