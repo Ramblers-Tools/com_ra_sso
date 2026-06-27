@@ -838,9 +838,6 @@ function configuration($OauthApp,$appLabel)
                                     </em>
                                 </div>
                             </div>
-                            <div class="mo_boot_col mo_boot_mt-3">
-                                <p><?php echo Text::_('COM_MINIORANGE_OAUTH_USER_AUTO_CREATION_NOT_AVAILABLE_NOTE');?></p>
-                            </div>
                         </div>
                     </div>
                 </div>

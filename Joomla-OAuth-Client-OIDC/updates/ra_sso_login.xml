@@ -5,11 +5,11 @@
 		<description>RA SSO Login for Joomla.</description>
 		<element>pkg_ra_sso_login</element>
 		<type>package</type>
-		<version>1.0.3</version>
+		<version>1.0.4</version>
 		<client>site</client>
-		<infourl title="Release notes">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/tag/v1.0.3</infourl>
+		<infourl title="Release notes">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/tag/v1.0.4</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/download/v1.0.3/ra-sso-login-installer.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/download/v1.0.4/ra-sso-login-installer.zip</downloadurl>
 		</downloads>
 		<targetplatform name="joomla" version="5.*"/>
 	</update>
