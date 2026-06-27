@@ -11,6 +11,9 @@
 		<downloads>
 			<downloadurl type="full" format="zip">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/download/v1.0.4/ra-sso-login-installer.zip</downloadurl>
 		</downloads>
+		<sha256>9c2eb4f56f3d34baadb320e735c736a61ad172659fc12bedb1f297a6a8193934</sha256>
+		<sha384>c0dbd4f87f03b4a186c62a5d5bb8454b0b7a90e9986c4c12ad39fb183a4cb6dd48709203c8e442f270808ba4ccd0ad91</sha384>
+		<sha512>cdc99d2c7a3d820faf23291431e43bfe356e0268750fc844ae3ffe4bd84a798cb7013f1c21632d3d77f4c7a6ff4698616f53f1bd209b9e0eaa1b701ba1314416</sha512>
 		<targetplatform name="joomla" version="5.*"/>
 	</update>
 </updates>
