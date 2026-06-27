@@ -8,6 +8,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Uri\Uri;
 
 class PlgSystemMooautherrorredirect extends CMSPlugin
 {
@@ -105,6 +106,7 @@ class PlgSystemMooautherrorredirect extends CMSPlugin
 		}
 
 		$siteName = htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8');
+		$homeUrl = htmlspecialchars(Uri::root(), ENT_QUOTES, 'UTF-8');
 
 		echo '<!DOCTYPE html>
 <html lang="en-GB">
@@ -174,6 +176,27 @@ class PlgSystemMooautherrorredirect extends CMSPlugin
 			color: var(--muted);
 		}
 
+		.actions {
+			margin-top: 26px;
+		}
+
+		.button {
+			display: inline-block;
+			padding: 10px 18px;
+			background: var(--accent);
+			color: #ffffff;
+			border-radius: 4px;
+			text-decoration: none;
+			font-weight: 700;
+		}
+
+		.button:focus,
+		.button:hover {
+			background: #18375f;
+			color: #ffffff;
+			text-decoration: none;
+		}
+
 		@media (max-width: 560px) {
 			main {
 				margin: 18px auto;
@@ -211,6 +234,8 @@ class PlgSystemMooautherrorredirect extends CMSPlugin
 		</ul>
 
 		<p>Once we have checked your details, we&rsquo;ll update the website system where appropriate and let you know when you can try signing in again.</p>
+
+		<p class="actions"><a class="button" href="' . $homeUrl . '">Return to website</a></p>
 
 		<p class="notice">Thank you for your patience.</p>
 	</main>
