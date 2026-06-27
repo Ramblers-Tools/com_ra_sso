@@ -5,15 +5,15 @@
 		<description>RA SSO Login for Joomla.</description>
 		<element>pkg_ra_sso_login</element>
 		<type>package</type>
-		<version>1.0.6</version>
+		<version>1.0.7</version>
 		<client>site</client>
-		<infourl title="Release notes">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/tag/v1.0.6</infourl>
+		<infourl title="Release notes">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/tag/v1.0.7</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/download/v1.0.6/ra-sso-login-installer.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/East-Cheshire-Ramblers/com_ra_sso/releases/download/v1.0.7/ra-sso-login-installer.zip</downloadurl>
 		</downloads>
-		<sha256>c1eb42aad7b648c4866ea1459672595d8d648b3320f75e5a687fa07bdb25fce7</sha256>
-		<sha384>f3921ccc21b107cfce8e54f2393780d79d5905a6f15bd1803b1da512ddea396852a3104d4ee53db09efdb139c98dcbad</sha384>
-		<sha512>13efc97078d4d913c1803b82ca054ad472356cf862242c08a69c5d13ec888fc1b76b79813ffeb2242b370ea3a5a38633a95ae9bfa35f65bdaa923e29e7966562</sha512>
+		<sha256>0dfaf7f4d5592c58eea9ffc2e358678da091ba34c49ab7a660cc3c05a037b365</sha256>
+		<sha384>3b55b9ce6028b3d0aa91747f1321e45bff1f27737a388a886f0dca245df43df9c62587707282a9996e8e4a53712be1ef</sha384>
+		<sha512>4dfa2eaade87af30c4b57623c6dce3a49f09cb14f3d9c94a2e4e21196a818b80109d812c7fb7960f6a3f4b84fe2e40eada3125bc131207b9e5119b2ea933884f</sha512>
 		<targetplatform name="joomla" version="5.*"/>
 	</update>
 </updates>
