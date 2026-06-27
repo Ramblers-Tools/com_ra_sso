@@ -578,13 +578,7 @@ class miniorangeoauthControllerAccountSetup extends FormController
 
     public function moClearLogs()
     {
-        $db = self::getDBObject();
-
-        $query = "SELECT COUNT(*) FROM " . $db->quoteName('#__miniorange_oauth_logs');
-        $db->setQuery($query);
-        $total_logs = $db->loadResult();
-
-        if($total_logs == 0) {
+        if (!MoOAuthLogger::clearLogs()) {
             $this->setRedirect(
                 'index.php?option=com_miniorange_oauth&view=accountsetup&tab-panel=loggerreport', 
                 Text::_('COM_MINIORANGE_OAUTH_LOGS_ARE_ALREADY_EMPTY'), 
@@ -592,10 +586,6 @@ class miniorangeoauthControllerAccountSetup extends FormController
             );
             return;
         }
-
-        $query = "TRUNCATE TABLE " . $db->quoteName('#__miniorange_oauth_logs');
-        $db->setQuery($query);
-        $db->execute();
 
         $messg = Text::_('COM_MINIORANGE_OAUTH_LOGS_CLEAR_SUCCESSFULLY');
         $this->setRedirect(

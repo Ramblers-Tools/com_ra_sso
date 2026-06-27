@@ -62,6 +62,8 @@ class MoOAuthLogger
     
     private static function saveLogToDatabase($message, $type = 'info', $file = null, $line = null, $function = null)
     {
+        self::ensureLogSchema();
+
         $db    = self::getDBObject();
         $query = $db->getQuery(true);
 
@@ -130,14 +132,38 @@ class MoOAuthLogger
 
     public static function getAllLogs()
     {
+        self::ensureLogSchema();
+
         $db = self::getDBObject();
         $query = $db->getQuery(true)->select($db->quoteName(['timestamp', 'log_level', 'message', 'file', 'line_number', 'function_call']))->from($db->quoteName('#__miniorange_oauth_logs'))->order($db->quoteName('timestamp') . ' DESC');
 
         return $db->setQuery($query)->loadObjectList() ?: [];
     }
 
+    public static function clearLogs()
+    {
+        self::ensureLogSchema();
+
+        $db = self::getDBObject();
+        $query = "SELECT COUNT(*) FROM " . $db->quoteName('#__miniorange_oauth_logs');
+        $db->setQuery($query);
+        $totalLogs = (int) $db->loadResult();
+
+        if ($totalLogs === 0) {
+            return false;
+        }
+
+        $query = "TRUNCATE TABLE " . $db->quoteName('#__miniorange_oauth_logs');
+        $db->setQuery($query);
+        $db->execute();
+
+        return true;
+    }
+
     private static function isLoggingEnabled()
     {
+        self::ensureLogSchema();
+
         $db = self::getDBObject();
         $query = $db->getQuery(true)
             ->select($db->quoteName('loggers_enable'))
@@ -148,6 +174,40 @@ class MoOAuthLogger
         $result = $db->loadResult();
 
         return (bool)$result;
+    }
+
+    public static function ensureLogSchema()
+    {
+        static $schemaChecked = false;
+
+        if ($schemaChecked) {
+            return;
+        }
+
+        $db = self::getDBObject();
+
+        $query = "CREATE TABLE IF NOT EXISTS " . $db->quoteName('#__miniorange_oauth_logs') . " (
+            " . $db->quoteName('id') . " INT AUTO_INCREMENT PRIMARY KEY,
+            " . $db->quoteName('timestamp') . " DATETIME NOT NULL,
+            " . $db->quoteName('log_level') . " VARCHAR(10) NOT NULL,
+            " . $db->quoteName('message') . " TEXT NOT NULL,
+            " . $db->quoteName('file') . " VARCHAR(255),
+            " . $db->quoteName('line_number') . " INT,
+            " . $db->quoteName('function_call') . " VARCHAR(255)
+        ) DEFAULT COLLATE=utf8_general_ci";
+        $db->setQuery($query);
+        $db->execute();
+
+        $columns = $db->getTableColumns($db->replacePrefix('#__miniorange_oauth_config'), false);
+
+        if (!isset($columns['loggers_enable'])) {
+            $query = "ALTER TABLE " . $db->quoteName('#__miniorange_oauth_config') .
+                " ADD COLUMN " . $db->quoteName('loggers_enable') . " TINYINT(1) NOT NULL DEFAULT 0";
+            $db->setQuery($query);
+            $db->execute();
+        }
+
+        $schemaChecked = true;
     }
 
     private static function getDBObject()
