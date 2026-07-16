@@ -12,6 +12,6 @@
 		<filename>index.html</filename>
 	</files>
 	<updateservers>
-		<server type="extension" priority="1" name="RA SSO Error Redirect Updates">https://raw.githubusercontent.com/East-Cheshire-Ramblers/mooautherrorredirect/main/updates/mooautherrorredirect.xml</server>
+		<server type="extension" priority="1" name="RA SSO Error Redirect Updates">https://raw.githubusercontent.com/Ramblers-Tools/mooautherrorredirect/main/updates/mooautherrorredirect.xml</server>
 	</updateservers>
 </extension>

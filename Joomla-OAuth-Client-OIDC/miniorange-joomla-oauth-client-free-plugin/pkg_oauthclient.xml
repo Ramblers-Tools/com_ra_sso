@@ -35,6 +35,6 @@
 		<language tag="it-IT">it-IT/it-IT.pkg_miniorangeoauth.sys.ini</language>
 	</languages>
 	<updateservers>
-		<server type="extension" priority="1" name="RA SSO Login Updates">https://raw.githubusercontent.com/East-Cheshire-Ramblers/com_ra_sso/main/Joomla-OAuth-Client-OIDC/updates/ra_sso_login.xml</server>
+		<server type="extension" priority="1" name="RA SSO Login Updates">https://raw.githubusercontent.com/Ramblers-Tools/com_ra_sso/main/Joomla-OAuth-Client-OIDC/updates/ra_sso_login.xml</server>
 	</updateservers>
 </extension>
