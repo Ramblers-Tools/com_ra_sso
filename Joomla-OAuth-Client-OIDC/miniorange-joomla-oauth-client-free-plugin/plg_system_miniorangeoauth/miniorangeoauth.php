@@ -53,6 +53,11 @@ class plgSystemMiniorangeoauth extends CMSPlugin
         $applicationName= isset($customerResult['appname']) ? $customerResult['appname'] : '';
         $sso_status      = isset($customerResult['sso_enable']) ? $customerResult['sso_enable'] : 0;
         $sso_button_enable = isset($customerResult['sso_button_enable']) ? $customerResult['sso_button_enable'] : 0;
+        // sso_enable/sso_button_enable both default to 1 on a fresh install,
+        // before any provider has actually been configured - without this,
+        // clicking the button hits the [MOOAUTH-001] "Client ID missing"
+        // error instead of doing anything useful.
+        $sso_configured = !empty($customerResult['client_id']) && !empty($customerResult['app_scope']);
 
         $versionObj = new Version();
         $version = $versionObj->getShortVersion();
@@ -79,7 +84,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             $pattern = '/(<div[^>]*class=["\']com-users-login__submit control-group["\'][^>]*>\s*<div[^>]*class=["\']controls["\'][^>]*>\s*<button[^>]*type=["\']submit["\'][^>]*>.*?<\/button>\s*<\/div>\s*<\/div>)/is';
         }
 
-        if ($sso_status == 1 && $sso_button_enable == 1 && $isLoginPage) {
+        if ($sso_status == 1 && $sso_button_enable == 1 && $sso_configured && $isLoginPage) {
             // Your custom SSO login button
             $linkAddPlace = '
                 <div class="form-group mt-2">
