@@ -1,0 +1,38 @@
+name: Beta pre-release
+
+on:
+  push:
+    branches:
+      - beta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from package manifest
+        id: version
+        run: |
+          VERSION=$(grep -oP '(?<=<version>)[^<]+' Joomla-OAuth-Client-OIDC/miniorange-joomla-oauth-client-free-plugin/pkg_oauthclient.xml | head -1)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building beta for v$VERSION"
+
+      - name: Build package zip
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          bash Joomla-OAuth-Client-OIDC/build-package.sh "$VERSION" "dist/ra-sso-login-installer-${VERSION}-beta.zip"
+
+      - name: Publish pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}-beta
+          name: v${{ steps.version.outputs.VERSION }} (beta)
+          prerelease: true
+          body: |
+            Beta build from the `beta` branch. For manual install/testing only — Joomla auto-update will not offer this build to production sites (`Joomla-OAuth-Client-OIDC/updates/ra_sso_login.xml` is not touched by this workflow).
+          files: dist/ra-sso-login-installer-${{ steps.version.outputs.VERSION }}-beta.zip
