@@ -221,6 +221,21 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             }
 
             if ($app->isClient('administrator')) {
+                // Joomla's own AdministratorApplication::findOption() would
+                // block this user from any real backend page anyway once
+                // they don't hold core.login.admin, but it leaves them
+                // pinned on the login page with no explanation instead of
+                // resetting them to guest. Do that explicitly here and send
+                // them to the frontend instead.
+                if (isset($user) && $user->id && !$user->authorise('core.login.admin')) {
+                    $guest = new User();
+                    $session->set('user', $guest);
+                    if (method_exists($app, 'loadIdentity')) {
+                        $app->loadIdentity($guest);
+                    }
+                    $app->redirect(Uri::root() . 'index.php');
+                }
+
                 $app->redirect(Uri::root() . 'administrator/index.php');
             } else {
                 $app->redirect(Uri::root() . 'index.php');
