@@ -105,11 +105,13 @@ class MoOauthClientHandler
             }
 
             // save the referrer in cookie so that we can come back to origin after SSO
+            // (site and administrator referrers are both honoured, so admin-initiated
+            // logins return to /administrator instead of always landing on the frontend)
             if (isset($_SERVER['HTTP_REFERER'])) {
                 $loginredirurl = $_SERVER['HTTP_REFERER'];
             }
 
-            if (!empty($loginredirurl) && strpos($loginredirurl, '/administrator/') === false) {
+            if (!empty($loginredirurl)) {
                 setcookie("returnurl", $loginredirurl);
             }
             
@@ -543,10 +545,10 @@ class MoOauthClientHandler
         }
         $cookieData = $input->cookie->getArray();
 
-        if (isset($cookieData['returnurl']) && strpos($cookieData['returnurl'], '/administrator/') === false) {
+        if (!empty($cookieData['returnurl'])) {
             $redirectloginuri = $cookieData['returnurl'];
-        } 
-        else 
+        }
+        else
         {
             $redirectloginuri = Uri::root() . 'index.php?';
         }

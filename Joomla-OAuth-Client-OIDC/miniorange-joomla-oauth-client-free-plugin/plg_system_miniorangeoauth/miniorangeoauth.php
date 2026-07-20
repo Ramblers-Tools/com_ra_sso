@@ -64,26 +64,29 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             $redirectUrlByVersion = "api/index.php/v1/ra-sso-login";
         }
 
-        if ($sso_status == 1 && $sso_button_enable == 1 && $app->isClient('site')) {
-            if (stristr($body, "user.login")) {
-                // Match the Joomla "Log in" button block specifically
+        if ($sso_status == 1 && $sso_button_enable == 1 && stristr($body, "user.login")) {
+            // Your custom SSO login button
+            $linkAddPlace = '
+                <div class="form-group mt-2">
+                    <a href="' . Uri::root() . $redirectUrlByVersion . '?rarequest=oauthredirect&app_name=' . $applicationName . '"
+                       class="btn btn-primary w-100">
+                       Login with ' . $applicationName . '
+                    </a>
+                </div>';
+
+            if ($app->isClient('administrator')) {
+                // Match the Joomla backend (atum template) "Log in" button block
+                $pattern = '/(<div[^>]*class=["\']form-group["\'][^>]*>\s*<button[^>]*id=["\']btn-login-submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
+            } else {
+                // Match the Joomla frontend "Log in" button block specifically
                 $pattern = '/(<div[^>]*class=["\']mod-login__submit form-group["\'][^>]*>\s*<button[^>]*name=["\']Submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
-
-                // Your custom SSO login button
-                $linkAddPlace = '
-                    <div class="form-group mt-2">
-                        <a href="' . Uri::root() . $redirectUrlByVersion . '?rarequest=oauthredirect&app_name=' . $applicationName . '" 
-                           class="btn btn-primary w-100">
-                           Login with ' . $applicationName . '
-                        </a>
-                    </div>';
-
-                // Append custom button after Joomla login button
-                $replacement = '$1' . $linkAddPlace;
-
-                $body = preg_replace($pattern, $replacement, $body, 1); // replace once
-                $app->setBody($body);
             }
+
+            // Append custom button after Joomla login button
+            $replacement = '$1' . $linkAddPlace;
+
+            $body = preg_replace($pattern, $replacement, $body, 1); // replace once
+            $app->setBody($body);
         }
     }
 
@@ -210,7 +213,11 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                 }
             }
 
-            $app->redirect(Uri::root() . 'index.php');
+            if ($app->isClient('administrator')) {
+                $app->redirect(Uri::root() . 'administrator/index.php');
+            } else {
+                $app->redirect(Uri::root() . 'index.php');
+            }
         }
     }
 
