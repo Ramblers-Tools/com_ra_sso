@@ -64,7 +64,18 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             $redirectUrlByVersion = "api/index.php/v1/ra-sso-login";
         }
 
-        if ($sso_status == 1 && $sso_button_enable == 1 && stristr($body, "user.login")) {
+        if ($app->isClient('administrator')) {
+            // Match the Joomla backend (atum template) "Log in" button block.
+            // The frontend's "user.login" marker string doesn't exist on this page.
+            $isLoginPage = stripos($body, 'btn-login-submit') !== false;
+            $pattern = '/(<div[^>]*class=["\']form-group["\'][^>]*>\s*<button[^>]*id=["\']btn-login-submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
+        } else {
+            $isLoginPage = stristr($body, "user.login") !== false;
+            // Match the Joomla frontend "Log in" button block specifically
+            $pattern = '/(<div[^>]*class=["\']mod-login__submit form-group["\'][^>]*>\s*<button[^>]*name=["\']Submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
+        }
+
+        if ($sso_status == 1 && $sso_button_enable == 1 && $isLoginPage) {
             // Your custom SSO login button
             $linkAddPlace = '
                 <div class="form-group mt-2">
@@ -73,14 +84,6 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                        Login with ' . $applicationName . '
                     </a>
                 </div>';
-
-            if ($app->isClient('administrator')) {
-                // Match the Joomla backend (atum template) "Log in" button block
-                $pattern = '/(<div[^>]*class=["\']form-group["\'][^>]*>\s*<button[^>]*id=["\']btn-login-submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
-            } else {
-                // Match the Joomla frontend "Log in" button block specifically
-                $pattern = '/(<div[^>]*class=["\']mod-login__submit form-group["\'][^>]*>\s*<button[^>]*name=["\']Submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
-            }
 
             // Append custom button after Joomla login button
             $replacement = '$1' . $linkAddPlace;
