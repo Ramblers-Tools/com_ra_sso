@@ -4,6 +4,7 @@
 set -euo pipefail
 
 VERSION="$1"
+mkdir -p "$(dirname "$2")"
 OUTPUT="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
