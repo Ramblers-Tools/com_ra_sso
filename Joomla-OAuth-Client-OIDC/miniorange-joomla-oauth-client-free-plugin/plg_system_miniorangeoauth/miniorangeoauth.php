@@ -70,9 +70,13 @@ class plgSystemMiniorangeoauth extends CMSPlugin
             $isLoginPage = stripos($body, 'btn-login-submit') !== false;
             $pattern = '/(<div[^>]*class=["\']form-group["\'][^>]*>\s*<button[^>]*id=["\']btn-login-submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
         } else {
+            // task=user.login is the com_users login form's post target and is
+            // present regardless of template, unlike any particular CSS class.
             $isLoginPage = stristr($body, "user.login") !== false;
-            // Match the Joomla frontend "Log in" button block specifically
-            $pattern = '/(<div[^>]*class=["\']mod-login__submit form-group["\'][^>]*>\s*<button[^>]*name=["\']Submit["\'][^>]*>.*?<\/button>\s*<\/div>)/is';
+            // Match the Joomla frontend com_users login "Log in" submit button
+            // (skips the passkey button, which shares the same wrapper class
+            // but is type="button" not type="submit").
+            $pattern = '/(<div[^>]*class=["\']com-users-login__submit control-group["\'][^>]*>\s*<div[^>]*class=["\']controls["\'][^>]*>\s*<button[^>]*type=["\']submit["\'][^>]*>.*?<\/button>\s*<\/div>\s*<\/div>)/is';
         }
 
         if ($sso_status == 1 && $sso_button_enable == 1 && $isLoginPage) {
@@ -81,7 +85,7 @@ class plgSystemMiniorangeoauth extends CMSPlugin
                 <div class="form-group mt-2">
                     <a href="' . Uri::root() . $redirectUrlByVersion . '?rarequest=oauthredirect&app_name=' . $applicationName . '"
                        class="btn btn-primary w-100">
-                       Login with ' . $applicationName . '
+                       Login with Single Sign On
                     </a>
                 </div>';
 
