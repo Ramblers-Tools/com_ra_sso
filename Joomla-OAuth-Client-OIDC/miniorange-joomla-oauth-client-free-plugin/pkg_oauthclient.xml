@@ -7,7 +7,7 @@
     <authorUrl>https://www.miniorange.com/</authorUrl>
     <copyright>Copyright (C) 2015 miniOrange. All rights reserved.</copyright>
     <license>GNU General Public License version 3; see LICENSE.txt</license>
-	<version>1.1.1</version>
+	<version>1.1.0</version>
 	<creationDate>Jul 2026</creationDate>
 	<description>RA SSO Login installed successfully.</description>
 	<scriptfile>pkg_script.php</scriptfile>
