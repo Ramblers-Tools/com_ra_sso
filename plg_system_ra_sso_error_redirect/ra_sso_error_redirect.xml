@@ -11,7 +11,4 @@
 		<filename>my_script.php</filename>
 		<filename>index.html</filename>
 	</files>
-	<updateservers>
-		<server type="extension" priority="1" name="RA SSO Error Redirect Updates">https://raw.githubusercontent.com/Ramblers-Tools/ra_sso_error_redirect/main/updates/ra_sso_error_redirect.xml</server>
-	</updateservers>
 </extension>
