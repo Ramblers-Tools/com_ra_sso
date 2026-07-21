@@ -5,13 +5,13 @@
         <description>RA SSO Login for Joomla.</description>
         <element>pkg_ra_sso_login</element>
         <type>package</type>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
         <client>site</client>
-        <infourl title="Release notes">https://github.com/Ramblers-Tools/ra-sso/releases/tag/v2.0.0</infourl>
+        <infourl title="Release notes">https://github.com/Ramblers-Tools/ra-sso/releases/tag/v2.0.1</infourl>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/Ramblers-Tools/ra-sso/releases/download/v2.0.0/ra-sso-login-installer.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/Ramblers-Tools/ra-sso/releases/download/v2.0.1/ra-sso-login-installer.zip</downloadurl>
         </downloads>
-        <sha256>99c9a331435942452da98de09d5e4b53db15619dd7711a257002ecea3d2c1305</sha256>
+        <sha256>38d5c91cfb3a247bbe8006f60ddca056cf9daaa889169309af068a281dcfd4b3</sha256>
         <targetplatform name="joomla" version="5.*"/>
     </update>
 </updates>
