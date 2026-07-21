@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="system" method="upgrade">
+	<name>PLG_SYSTEM_RA_SSO</name>
+	<author>East Cheshire Ramblers</author>
+    <copyright>Copyright (C) 2026 East Cheshire Ramblers. Based on original work Copyright (C) 2015 miniOrange.</copyright>
+    <license>GNU General Public License version 3; see LICENSE.txt</license>
+	<creationDate>Jan 2018</creationDate>
+	<version>3.1.4</version>
+	<description>PLG_SYSTEM_RA_SSO_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="ra_sso">ra_sso.php</filename>
+	</files>
+	
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_system_ra_sso.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_system_ra_sso.sys.ini</language>
+		<language tag="de-DE">de-DE/de-DE.plg_system_ra_sso.ini</language>
+		<language tag="de-DE">de-DE/de-DE.plg_system_ra_sso.sys.ini</language>
+		<language tag="es-ES">es-ES/es-ES.plg_system_ra_sso.ini</language>
+		<language tag="es-ES">es-ES/es-ES.plg_system_ra_sso.sys.ini</language>
+		<language tag="ja-JP">ja-JP/ja-JP.plg_system_ra_sso.ini</language>
+		<language tag="ja-JP">ja-JP/ja-JP.plg_system_ra_sso.sys.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.plg_system_ra_sso.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.plg_system_ra_sso.sys.ini</language>
+		<language tag="fr-FR">fr-FR/fr-FR.plg_system_ra_sso.ini</language>
+		<language tag="fr-FR">fr-FR/fr-FR.plg_system_ra_sso.sys.ini</language>
+		<language tag="it-IT">it-IT/it-IT.plg_system_ra_sso.ini</language>
+		<language tag="it-IT">it-IT/it-IT.plg_system_ra_sso.sys.ini</language>
+	</languages>
+	<scriptfile>my_script.php</scriptfile>
+	<component>
+	
+	</component>
+</extension>

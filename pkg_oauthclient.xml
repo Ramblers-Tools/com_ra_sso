@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="package" method="upgrade">
+	<name>pkg_ra_sso_login</name>
+	<packagename>ra_sso_login</packagename>
+	<author>East Cheshire Ramblers</author>
+    <copyright>Copyright (C) 2026 East Cheshire Ramblers. Based on original work Copyright (C) 2015 miniOrange.</copyright>
+    <license>GNU General Public License version 3; see LICENSE.txt</license>
+	<version>2.0.0</version>
+	<creationDate>Jul 2026</creationDate>
+	<description>RA SSO Login installed successfully.</description>
+	<scriptfile>pkg_script.php</scriptfile>
+	<files>
+		<file type="plugin" id="ra_sso" group="system">plg_system_ra_sso.zip</file>
+		<file type="plugin" id="ra_sso_error_redirect" group="system">plg_system_ra_sso_error_redirect.zip</file>
+        <file type="plugin" id="ra_sso" group="webservices">plg_webservices_ra_sso.zip</file>
+		<file type="component" id="ra_sso" >com_ra_sso.zip</file>
+        <file type="library" id="ra_sso">lib_ra_sso.zip</file>
+	</files>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.pkg_ra_sso.ini</language>
+		<language tag="en-GB">en-GB/en-GB.pkg_ra_sso.sys.ini</language>
+		<language tag="de-DE">de-DE/de-DE.pkg_ra_sso.ini</language>
+		<language tag="de-DE">de-DE/de-DE.pkg_ra_sso.sys.ini</language>
+		<language tag="es-ES">es-ES/es-ES.pkg_ra_sso.ini</language>
+		<language tag="es-ES">es-ES/es-ES.pkg_ra_sso.sys.ini</language>
+		<language tag="ja-JP">ja-JP/ja-JP.pkg_ra_sso.ini</language>
+		<language tag="ja-JP">ja-JP/ja-JP.pkg_ra_sso.sys.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.pkg_ra_sso.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.pkg_ra_sso.sys.ini</language>
+		<language tag="fr-FR">fr-FR/fr-FR.pkg_ra_sso.ini</language>
+		<language tag="fr-FR">fr-FR/fr-FR.pkg_ra_sso.sys.ini</language>
+		<language tag="it-IT">it-IT/it-IT.pkg_ra_sso.ini</language>
+		<language tag="it-IT">it-IT/it-IT.pkg_ra_sso.sys.ini</language>
+	</languages>
+	<updateservers>
+		<server type="extension" priority="1" name="RA SSO Login Updates">https://raw.githubusercontent.com/Ramblers-Tools/ra-sso/main/updates/ra_sso_login.xml</server>
+	</updateservers>
+</extension>

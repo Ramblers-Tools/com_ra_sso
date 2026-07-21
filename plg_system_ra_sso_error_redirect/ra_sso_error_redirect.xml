@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade">
+	<name>System - RA SSO Error Redirect</name>
+	<author>East Cheshire Ramblers</author>
+	<creationDate>2026-06-26</creationDate>
+	<version>1.2.1</version>
+	<description>Replaces the RA SSO user auto-creation error page with a friendly built-in access message.</description>
+	<scriptfile>my_script.php</scriptfile>
+	<files>
+		<filename plugin="ra_sso_error_redirect">ra_sso_error_redirect.php</filename>
+		<filename>my_script.php</filename>
+		<filename>index.html</filename>
+	</files>
+	<updateservers>
+		<server type="extension" priority="1" name="RA SSO Error Redirect Updates">https://raw.githubusercontent.com/Ramblers-Tools/ra_sso_error_redirect/main/updates/ra_sso_error_redirect.xml</server>
+	</updateservers>
+</extension>
