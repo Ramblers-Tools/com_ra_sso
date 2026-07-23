@@ -17,12 +17,20 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Version;
+use Joomla\CMS\Extension\ExtensionHelper;
 
 $document = Factory::getApplication()->getDocument();
-$document->addScript(Uri::base() . 'components/com_ra_sso/assets/js/bootstrap.js');
-$document->addScript(Uri::base() . 'components/com_ra_sso/assets/js/myscript.js');
-$document->addStyleSheet(Uri::base() . 'components/com_ra_sso/assets/css/ra_sso.css');
-$document->addStyleSheet(Uri::base() . 'components/com_ra_sso/assets/css/ra_sso_boot.css');
+$ra_sso_asset_version = '';
+try {
+    $manifest_cache = ExtensionHelper::getExtensionRecord('com_ra_sso')->manifest_cache ?? '';
+    $ra_sso_asset_version = json_decode($manifest_cache)->version ?? '';
+} catch (\Throwable $e) {
+    // fall back to no cache-busting query string
+}
+$document->addScript(Uri::base() . 'components/com_ra_sso/assets/js/bootstrap.js' . ($ra_sso_asset_version ? '?v=' . $ra_sso_asset_version : ''));
+$document->addScript(Uri::base() . 'components/com_ra_sso/assets/js/myscript.js' . ($ra_sso_asset_version ? '?v=' . $ra_sso_asset_version : ''));
+$document->addStyleSheet(Uri::base() . 'components/com_ra_sso/assets/css/ra_sso.css' . ($ra_sso_asset_version ? '?v=' . $ra_sso_asset_version : ''));
+$document->addStyleSheet(Uri::base() . 'components/com_ra_sso/assets/css/ra_sso_boot.css' . ($ra_sso_asset_version ? '?v=' . $ra_sso_asset_version : ''));
 $document->addStyleSheet('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 $document->addScript('https://code.jquery.com/jquery-3.7.1.min.js');
 $document->addStyleSheet('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
