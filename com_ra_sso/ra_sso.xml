@@ -6,7 +6,7 @@
 	<author>East Cheshire Ramblers</author>
     <copyright>Copyright (C) 2026 East Cheshire Ramblers. Based on original work Copyright (C) 2015 miniOrange.</copyright>
     <license>GNU General Public License version 3; see LICENSE.txt</license>
-	<version>3.1.8</version>
+	<version>3.1.11</version>
 	<description>COM_RA_SSO_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
  
