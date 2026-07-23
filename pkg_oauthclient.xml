@@ -5,7 +5,7 @@
 	<author>East Cheshire Ramblers</author>
     <copyright>Copyright (C) 2026 East Cheshire Ramblers. Based on original work Copyright (C) 2015 miniOrange.</copyright>
     <license>GNU General Public License version 3; see LICENSE.txt</license>
-	<version>2.0.2</version>
+	<version>2.0.3</version>
 	<creationDate>Jul 2026</creationDate>
 	<description>RA SSO Login installed successfully.</description>
 	<scriptfile>pkg_script.php</scriptfile>
